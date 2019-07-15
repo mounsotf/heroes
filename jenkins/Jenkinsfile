@@ -1,0 +1,174 @@
+
+def dbdockerImage
+def appdockerImage
+def dockerfile
+def cleanupContainers(){
+    sh 'docker system prune -f' 
+    sh 'docker stop heroes_application || true && docker rm heroes_application || true' 
+    sh 'docker stop heroes_db || true && docker rm heroes_db || true' 
+    sh 'docker stop heroes_adminer || true && docker rm heroes_adminer || true' 
+    sh 'docker stop heroes_chrome  || true && docker rm heroes_chrome  || true' 
+    sh 'docker stop heroes_firefox  || true && docker rm heroes_firefox  || true' 
+    sh 'docker stop selenium-hub  || true && docker rm selenium-hub  || true' 
+
+    sh 'docker network rm heroes-net || true' 
+    sh 'docker network rm grid || true' 
+
+}
+def cleanupLatestImages(){
+    sh "docker rmi $registry:heroes_db || true"
+    sh "docker rmi $registry:heroes_db-${BUILD_NUMBER} || true"
+    sh "docker rmi $registry:heroes_db-latest || true"
+    sh "docker rmi $registry:heroes_application || true"
+    sh "docker rmi $registry:heroes_application-${BUILD_NUMBER} || true"
+    sh "docker rmi $registry:heroes_application-latest || true"
+}
+pipeline { 
+    agent any 
+    environment { 
+        CI = 'true' 
+        PATH = "$PATH:/usr/local/bin" 
+        registry = "mouniryoussef/mounir"
+        registryCredential = 'dockerhub'
+    }
+    options {
+       // skipDefaultCheckout true
+       buildDiscarder(logRotator(numToKeepStr: '3'))
+    }
+     
+    stages { 
+        stage('Satge-1-Build Artifacts') { 
+            agent { 
+                docker { 
+                    image 'node:10.15.0-alpine'  
+                    args '-p 4200:4200 -p 5000:5000 -v /usr/src/app'  
+                } 
+            } 
+            steps { 
+                sh 'rm -rf node_modules' 
+                sh 'npm install npm@latest -g' 
+                sh 'npm install' 
+                sh 'npm install @angular/cli' 
+                sh 'npm link @angular/cli' 
+                sh 'ng build --prod --base-href /heroes/' 
+                sh 'rm -f heroes.war' 
+                zip zipFile: 'heroes.war', archive: false, dir: 'dist/heroes' 
+                archiveArtifacts artifacts: 'heroes.war', fingerprint: true, onlyIfSuccessful: true 
+               // input "ready to next stage?" 
+            } 
+        }  
+        stage('Stage-2- kikkoff the docker containers') { 
+            when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+            steps { 
+                echo 'Copying artifacts to jenkins' 
+                copyArtifacts filter: 'heroes.war',  
+                fingerprintArtifacts: true, projectName: '${JOB_NAME}',  
+                selector: specific('${BUILD_NUMBER}'),  
+                target: 'docker/application' 
+                sh 'rm -rf docker/application/heroes' 
+                //sh 'ls docker/application' 
+                echo 'build the new images and tag each one by the build number' 
+                //sh 'docker build --no-cache -t heroes_db:${BUILD_NUMBER} -f docker/database/Dockerfile ./docker/database/' 
+                script{
+                    dockerfile = 'docker/database/Dockerfile'
+                    dbdockerImage = docker.build(registry + ":heroes_db", "-f ${dockerfile} ./docker/database")
+                    //sh 'docker build --no-cache -t heroes_application:${BUILD_NUMBER} -f docker/application/Dockerfile ./docker/application/' 
+                    dockerfile = 'docker/application/Dockerfile'
+                    appdockerImage = docker.build(registry +":heroes_application", "-f ${dockerfile} ./docker/application")
+           
+                    echo 'run the dockers' 
+                    sh 'docker network create heroes-net' 
+                    sh 'docker run -d --name heroes_db -p 3306:3306 --network heroes-net ${registry}:heroes_db' 
+                    sh 'docker run -d --name heroes_application -p 8080:8080 --network heroes-net ${registry}:heroes_application' 
+                    sh 'docker run -d --name heroes_adminer -p 8081:8080 --network heroes-net adminer:latest' 
+                    echo 'run gird hub and related nodes' 
+                    sh'docker network create grid' 
+                    sh 'docker run -d --name selenium-hub -p 4444:4444 --net grid  selenium/hub:3.141.59-neon' 
+                    sh 'docker run -d -P -p 5900:5900 --name heroes_chrome --net grid -e HUB_HOST=selenium-hub -v /dev/shm:/dev/shm selenium/node-chrome-debug:3.141.59-neon' 
+                    sh 'docker run -d -P -p 5901:5900 --name heroes_firefox --net grid -e HUB_HOST=selenium-hub -v /dev/shm:/dev/shm selenium/node-firefox-debug:3.141.59-neon' 
+                    // echo 'run standalone chrome docker' 
+                    //sh 'docker run -d --name heroes_chrome --network heroes-net --privileged -p 4444:4444 -v /dev/shm:/dev/shm selenium/standalone-chrome:3.141.59-mercury' 
+                    
+                    //input "ready to regression test ?" 
+                }
+            } 
+        } 
+   
+         stage('Stage-3- Selenium Script Regression Test') { 
+             when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+            agent {  
+                docker { 
+                    image 'maven:3.6.0-jdk-12' 
+                    args '-v /root/.m2:/root/.m2'  
+                } 
+            } 
+            steps { 
+                sh 'mvn site -f ./AutomationScripts/pom.xml' 
+                // maven test results 
+                archiveArtifacts artifacts: 'AutomationScripts/target/site/**/*.*', fingerprint: true 
+                junit 'AutomationScripts/target/surefire-reports/*.xml' 
+                
+                echo 'Selenium Script Regression Test completed!' 
+                 
+            } 
+        } 
+                
+    //   stage('Stage-4- Recorded Regression Test') { 
+    //             steps { 
+    //             sh 'ls recordedtests' 
+    //             sh 'chmod +x recordedtests/run_chrome.sh' 
+    //             sh './recordedtests/run_chrome.sh' 
+                
+    //              input "Does the regression test look ok?" 
+    //         } 
+    //     } 
+    //     stage('Stage-5-Sanity check') { 
+    //         steps { 
+    //             input "Does the staging environment look ok?" 
+    //         } 
+    //     } 
+ 
+    stage('Deploy Image') {
+        when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+        steps{
+            script {
+                docker.withRegistry( '', registryCredential ) {
+                    dbdockerImage.push("heroes_db-"+"${BUILD_NUMBER}")
+                    dbdockerImage.push("heroes_db-"+"latest")
+                    appdockerImage.push("heroes_application-"+"${BUILD_NUMBER}")
+                    appdockerImage.push("heroes_application-" + "latest")
+                }
+            }
+        }
+    }
+    } 
+    post { 
+        always { 
+            // // maven test results 
+            // archive "./AutomationScripts/target/**/*" 
+            // junit './AutomationScripts/target/surefire-reports/*.xml' 
+            // // katalon recordings test results 
+            // archiveArtifacts artifacts: './recordedtests/report/**/*.*', fingerprint: true 
+            // junit './recordedtests/report/**/JUnit_Report.xml' 
+            cleanWs() // clean up our workspace 
+            echo 'Remove latest docker containers, network and volumes' 
+            cleanupContainers()
+            echo 'Remove latest docker images' 
+            cleanupLatestImages() 
+            echo 'One way or another, I have finished' 
+            
+        } 
+        success { 
+            echo 'I succeeeded!' 
+        } 
+        unstable { 
+            echo 'I am unstable :/' 
+        } 
+        failure { 
+            echo 'I failed :(' 
+        } 
+        changed { 
+            echo 'Things were different before...' 
+        } 
+    } 
+} 

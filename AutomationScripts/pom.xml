@@ -1,0 +1,151 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd"> 
+    <modelVersion>4.0.0</modelVersion> 
+    <groupId>com.Heros.Automation.app</groupId> 
+    <artifactId>HerosAutomation</artifactId> 
+    <packaging>jar</packaging> 
+    <version>1.0-SNAPSHOT</version> 
+    <name>HeroesAutomation</name> 
+    <url>http://maven.apache.org</url> 
+    <description>Automation test for Heoes example JUnit 5</description> 
+    <organization> 
+        <name>mounsoft company</name> 
+        <url>http://www.mounsoft.com/</url> 
+    </organization> 
+     <developers> 
+        <developer> 
+            <id>MOUNID</id> 
+            <name>Mounir Youssef</name> 
+            <email>mounir.youssef@gmail.com</email> 
+        </developer> 
+    </developers> 
+    <inceptionYear>2019</inceptionYear> 
+      <licenses> 
+        <license> 
+            <name>The mounsoft License, Version 2.0</name> 
+            <url>http://www.mounsoft.com/licenses/LICENSE-2.0.txt</url> 
+        </license> 
+    </licenses> 
+    <properties> 
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding> 
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding> 
+        <java.version>12</java.version> 
+         <maven.compiler.source>${java.version}</maven.compiler.source> 
+        <maven.compiler.target>${java.version}</maven.compiler.target> 
+        <junit.jupiter.version>5.4.2</junit.jupiter.version> 
+        <log4j.version>2.10.0</log4j.version> 
+        <selenium.version>3.141.59</selenium.version> 
+        <monte-screen-recorder.version>0.7.7.0</monte-screen-recorder.version> 
+        <mysql.version>8.0.15</mysql.version> 
+        <commons-io.version>2.6</commons-io.version> 
+        <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version> 
+        <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version> 
+        <maven-surefire-report-plugin.version>3.0.0-M3</maven-surefire-report-plugin.version> 
+        <maven-site-plugin.version>3.7.1</maven-site-plugin.version> 
+        <maven-project-info-reports-plugin.version>3.0.0</maven-project-info-reports-plugin.version> 
+        <junit-jupiter-params.version>5.5.0-M1</junit-jupiter-params.version> 
+ 
+    </properties> 
+    <dependencies> 
+     
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core --> 
+    <dependency> 
+        <groupId>org.apache.logging.log4j</groupId> 
+        <artifactId>log4j-core</artifactId> 
+        <version>${log4j.version}</version> 
+    </dependency> 
+ 
+    <!-- https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api --> 
+    <dependency> 
+        <groupId>org.apache.logging.log4j</groupId> 
+        <artifactId>log4j-api</artifactId> 
+        <version>${log4j.version}</version> 
+    </dependency> 
+ 
+    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-engine --> 
+    <dependency> 
+        <groupId>org.junit.jupiter</groupId> 
+        <artifactId>junit-jupiter-engine</artifactId> 
+        <version>${junit.jupiter.version}</version> 
+        <scope>test</scope> 
+    </dependency> 
+    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-params --> 
+    <dependency> 
+        <groupId>org.junit.jupiter</groupId> 
+        <artifactId>junit-jupiter-params</artifactId> 
+        <version>${junit-jupiter-params.version}</version> 
+        <scope>test</scope> 
+    </dependency> 
+     
+    <!-- https://mvnrepository.com/artifact/org.seleniumhq.selenium/selenium-java --> 
+    <dependency> 
+        <groupId>org.seleniumhq.selenium</groupId> 
+        <artifactId>selenium-java</artifactId> 
+        <version>${selenium.version}</version> 
+    </dependency> 
+    <!-- https://mvnrepository.com/artifact/org.monte/screen-recorder --> 
+    <!-- https://mvnrepository.com/artifact/com.github.stephenc.monte/monte-screen-recorder --> 
+    <dependency> 
+        <groupId>com.github.stephenc.monte</groupId> 
+        <artifactId>monte-screen-recorder</artifactId> 
+        <version>${monte-screen-recorder.version}</version> 
+    </dependency> 
+    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java --> 
+    <dependency> 
+        <groupId>mysql</groupId> 
+        <artifactId>mysql-connector-java</artifactId> 
+        <version>${mysql.version}</version> 
+    </dependency> 
+    <!-- https://mvnrepository.com/artifact/commons-io/commons-io --> 
+    <dependency> 
+        <groupId>commons-io</groupId> 
+        <artifactId>commons-io</artifactId> 
+        <version>${commons-io.version}</version> 
+    </dependency> 
+ 
+    </dependencies> 
+    <build> 
+            <plugins> 
+                <plugin> 
+                     <groupId>org.apache.maven.plugins</groupId> 
+                    <artifactId>maven-compiler-plugin</artifactId> 
+                    <version>${maven-compiler-plugin.version}</version> 
+                </plugin> 
+                <!-- JUnit 5 requires Surefire version 2.22.1 or higher --> 
+                <plugin> 
+                    <groupId>org.apache.maven.plugins</groupId> 
+                     <artifactId>maven-surefire-plugin</artifactId> 
+                     <version>${maven-surefire-plugin.version}</version> 
+                <configuration>
+                    <properties>
+                    <!-- Attach Clover's test interceptor in order to record JUnit4 Parameterized tests -->
+                    <property>
+                        <name>listener</name>
+                        <value>com.atlassian.clover.recorder.junit.JUnitTestRunnerInterceptor</value>
+                    </property>
+                    </properties>
+        </configuration>   
+                </plugin> 
+                <plugin> 
+                    <groupId>org.apache.maven.plugins</groupId> 
+                    <artifactId>maven-site-plugin</artifactId> 
+                    <version>${maven-site-plugin.version}</version> 
+                </plugin> 
+                 
+            </plugins> 
+        </build> 
+    <reporting> 
+    <plugins> 
+        <plugin> 
+            <groupId>org.apache.maven.plugins</groupId> 
+            <artifactId>maven-surefire-report-plugin</artifactId> 
+            <version>${maven-surefire-report-plugin.version}</version> 
+        </plugin> 
+        <plugin>  
+            <groupId>org.apache.maven.plugins</groupId> 
+            <artifactId>maven-project-info-reports-plugin</artifactId> 
+            <version>${maven-project-info-reports-plugin.version}</version> 
+        </plugin> 
+      </plugins> 
+  </reporting> 
+</project> 

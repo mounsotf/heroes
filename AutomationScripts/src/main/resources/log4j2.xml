@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Properties>
+		<Property name="log-path">logs</Property>
+	</Properties>
+	<Appenders>
+		<Console name="console-log" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C{2} - %msg%n" />
+		</Console>
+		<RollingFile name="trace-log"
+			fileName="${log-path}/JasperReportingAutomation-trace.log"
+			filePattern="${log-path}/JasperReportingAutomation-trace-%d{yyyy-MM-dd}.log">
+			<PatternLayout>
+				<pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C{2} - %msg%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy max="5" />
+		</RollingFile>
+		<RollingFile name="error-log"
+			fileName="${log-path}/JasperReportingAutomation-error.log"
+			filePattern="${log-path}/JasperReportingAutomation-error-%d{yyyy-MM-dd}.log">
+			<PatternLayout>
+				<pattern>[%-5level] %d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %C{2} - %msg%n</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy interval="1"
+					modulate="true" />
+			</Policies>
+			<DefaultRolloverStrategy max="5" />
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Logger name="com.JasperReportingAutomation.log4j2" level="debug"
+			additivity="false">
+			<appender-ref ref="trace-log" level="info" />
+			<appender-ref ref="error-log" level="error" />
+			<appender-ref ref="console-log" level="debug" />
+		</Logger>
+
+		
+		<Root level="debug" additivity="false">
+			<AppenderRef ref="console-log" />
+		</Root>
+
+	</Loggers>
+</Configuration>

@@ -1,0 +1,28 @@
+# docker-compose.yml
+version: '3.1'
+
+services:
+    db:
+        container_name: "jasperreportingtool-db"
+        build: ./database
+        ports:
+            - 3306:3306
+        networks:
+            - crystaltrack_net
+    adminer:
+        container_name: "jasperreportingtool-adminer"
+        image: adminer
+        ports:
+            - 8081:8080
+        networks:
+            - crystaltrack_net
+    application:
+        container_name: "jasperreportingtool-app"
+        build: ./application
+        ports:
+            - 8080:8080
+        networks:
+            - crystaltrack_net
+networks:
+    crystaltrack_net:
+        driver: bridge

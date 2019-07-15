@@ -1,0 +1,15 @@
+.editorconfig
+.gitignore
+.npmignore
+.travis.yml
+aot
+gulpfile.js
+in-memory-web-api
+karma-test-shim.js
+karma.conf.js
+rollup.config.js
+src
+tsconfig.json
+tsconfig-ngc.json
+tslint.json
+yarn.lock
