@@ -58,7 +58,7 @@ pipeline {
             } 
         }  
         stage('Stage-2- kikkoff the docker containers') { 
-            when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+            when { anyOf { branch '*-feature'; branch 'development' } }
             steps { 
                 echo 'Copying artifacts to jenkins' 
                 copyArtifacts filter: 'heroes.war',  
@@ -95,7 +95,7 @@ pipeline {
         } 
    
          stage('Stage-3- Selenium Script Regression Test') { 
-             when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+             when { anyOf { branch '*-feature'; branch 'development' } }
             agent {  
                 docker { 
                     image 'maven:3.6.0-jdk-12' 
@@ -129,7 +129,7 @@ pipeline {
     //     } 
  
     stage('Deploy Image') {
-        when { anyOf { branch 'feature-enhance-jenkinsfile-scripts'; branch 'development' } }
+        when { anyOf { branch 'development' } }
         steps{
             script {
                 docker.withRegistry( '', registryCredential ) {
