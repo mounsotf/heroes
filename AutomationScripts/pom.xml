@@ -33,7 +33,7 @@
          <maven.compiler.source>${java.version}</maven.compiler.source> 
         <maven.compiler.target>${java.version}</maven.compiler.target> 
         <junit.jupiter.version>5.4.2</junit.jupiter.version> 
-        <log4j.version>2.10.0</log4j.version> 
+        <log4j.version>2.13.3</log4j.version> 
         <selenium.version>3.141.59</selenium.version> 
         <monte-screen-recorder.version>0.7.7.0</monte-screen-recorder.version> 
         <mysql.version>8.0.15</mysql.version> 
