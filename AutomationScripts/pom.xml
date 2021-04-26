@@ -37,7 +37,7 @@
         <selenium.version>3.141.59</selenium.version> 
         <monte-screen-recorder.version>0.7.7.0</monte-screen-recorder.version> 
         <mysql.version>8.0.15</mysql.version> 
-        <commons-io.version>2.6</commons-io.version> 
+        <commons-io.version>2.7</commons-io.version> 
         <maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version> 
         <maven-surefire-plugin.version>3.0.0-M3</maven-surefire-plugin.version> 
         <maven-surefire-report-plugin.version>3.0.0-M3</maven-surefire-report-plugin.version> 
